@@ -1,175 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Strong Vincents Middle School Tea</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* RESET */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+<script>
+    const CREATOR_PASSWORD = 'Nonagon45'; // new password
+    let gossipList = JSON.parse(localStorage.getItem('gossipList')) || [];
+    let isCreator = false;
+    let notificationsEnabled = false;
+
+    function showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('app').classList.remove('app-hidden');
+        updateNotificationButtonText();
+        displayGossip();
     }
 
-    :root {
-      --bg: #fff7fd;
-      --accent: #ff5fa2;
-      --accent-soft: #ffe0f1;
-      --dark: #2a1133;
-      --text: #4b314f;
-      --card: #ffffff;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      --rounded-xl: 18px;
-      --rounded-full: 999px;
-      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      --font-script: "Brush Script MT", "Lucida Handwriting", cursive;
+    function enterAsCreator() {
+        const input = document.getElementById('creatorPassword').value;
+
+        // Trim spaces and make case-insensitive
+        const typed = input.trim().toLowerCase();
+        const correct = CREATOR_PASSWORD.trim().toLowerCase();
+
+        if (typed === correct) {
+            isCreator = true;
+            document.getElementById('roleTag').textContent = 'Creator mode: you can post and delete tea.';
+            document.getElementById('guestHint').textContent = '';
+            showApp();
+        } else {
+            alert('Wrong password. Try again or continue as guest.');
+        }
     }
 
-    body {
-      font-family: var(--font-main);
-      background: radial-gradient(circle at 0 0, #ffeef8, #fff7fd 40%, #ffe6ff);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    function enterAsGuest() {
+        isCreator = false;
+        document.getElementById('roleTag').textContent = 'Guest mode: you can post tea but cannot delete.';
+        document.getElementById('guestHint').textContent = 'Guest access: You can post tea, but only the creator can delete it.';
+        showApp();
     }
 
-    /* HEADER / NAV */
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(12px);
-      background: linear-gradient(
-        90deg,
-        rgba(255, 247, 253, 0.92),
-        rgba(255, 224, 241, 0.92)
-      );
-      border-bottom: 1px solid rgba(255, 149, 207, 0.35);
+    // Notification helpers
+    function updateNotificationButtonText() {
+        const btn = document.getElementById('notifyBtn');
+        if (!('Notification' in window)) {
+            btn.textContent = 'Notifications not supported';
+            btn.disabled = true;
+            return;
+        }
+        if (Notification.permission === 'granted' && notificationsEnabled) {
+            btn.textContent = 'Notifications on 🔔';
+        } else {
+            btn.textContent = 'Allow notifications 🔔';
+        }
     }
 
-    .nav {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0.8rem 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+    function toggleNotifications() {
+        if (!('Notification' in window)) {
+            alert('This browser does not support notifications.');
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            notificationsEnabled = !notificationsEnabled;
+            updateNotificationButtonText();
+            if (notificationsEnabled) {
+                new Notification('Notifications enabled', {
+                    body: 'You will get a ping whenever new tea is posted.',
+                    icon: ''
+                });
+            }
+            return;
+        }
+
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                notificationsEnabled = true;
+                updateNotificationButtonText();
+                new Notification('Notifications enabled', {
+                    body: 'You will get a ping whenever new tea is posted.',
+                    icon: ''
+                });
+            } else {
+                notificationsEnabled = false;
+                updateNotificationButtonText();
+                alert('Notifications were blocked. You can change this in your browser settings.');
+            }
+        });
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+    function sendNewTeaNotification(text) {
+        if (!notificationsEnabled) return;
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+
+        const preview = text.length > 50 ? text.slice(0, 47) + '...' : text;
+        new Notification('New Tea Posted ☕', {
+            body: preview,
+            icon: ''
+        });
     }
 
-    .brand-logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 18px;
-      background: conic-gradient(
-        from 220deg,
-        #ff5fa2,
-        #ffc15f,
-        #6b5bff,
-        #ff5fa2
-      );
-      display: grid;
-      place-items: center;
-      color: white;
-      font-weight: 700;
-      font-size: 1.2rem;
-      box-shadow: 0 8px 18px rgba(255, 95, 162, 0.4);
+    function addGossip() {
+        const input = document.getElementById('gossipInput');
+        const text = input.value.trim();
+
+        if (text === '') {
+            alert('Please spill some tea first! 🍵');
+            return;
+        }
+
+        const gossip = {
+            id: Date.now(),
+            text: text,
+            time: new Date().toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        };
+
+        gossipList.unshift(gossip);
+        localStorage.setItem('gossipList', JSON.stringify(gossipList));
+        input.value = '';
+        displayGossip();
+        celebration();
+        sendNewTeaNotification(text);
     }
 
-    .brand-text-main {
-      font-family: var(--font-script);
-      font-size: 1.5rem;
-      color: var(--dark);
-      line-height: 1;
+    function deleteGossip(id) {
+        if (!isCreator) {
+            alert('Only the creator can delete tea. 💅');
+            return;
+        }
+
+        gossipList = gossipList.filter(item => item.id !== id);
+        localStorage.setItem('gossipList', JSON.stringify(gossipList));
+        displayGossip();
     }
 
-    .brand-text-sub {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #866190;
+    function displayGossip() {
+        const container = document.getElementById('gossipContainer');
+        if (gossipList.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>No tea yet! Be the first to spill the gossip...</p></div>';
+            return;
+        }
+
+        container.innerHTML = gossipList.map(gossip => `
+            <div class="gossip-item">
+                <p>${gossip.text}</p>
+                <div class="gossip-time">Posted: ${gossip.time}</div>
+                <button class="delete-btn" onclick="deleteGossip(${gossip.id})">Delete</button>
+            </div>
+        `).join('');
     }
 
-    .nav-links {
-      display: flex;
-      gap: 0.8rem;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
+    function celebration() {
+        const emojis = ['✨', '💋', '☕', '🍵', '💬'];
+        for (let i = 0; i < 10; i++) {
+            const emoji = document.createElement('div');
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            emoji.style.position = 'fixed';
+            emoji.style.left = Math.random() * window.innerWidth + 'px';
+            emoji.style.top = '-30px';
+            emoji.style.fontSize = '2em';
+            emoji.style.animation = 'fall 3s linear';
+            emoji.style.pointerEvents = 'none';
+            document.body.appendChild(emoji);
+            setTimeout(() => emoji.remove(), 3000);
+        }
     }
 
-    .nav-links button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      padding: 0.45rem 0.8rem;
-      border-radius: var(--rounded-full);
-      color: #7c5b8a;
-      transition: all 0.18s ease-out;
-    }
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fall {
+            to {
+                transform: translateY(${window.innerHeight}px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 
-    .nav-links button:hover,
-    .nav-links button.active {
-      background: #ffedf6;
-      color: var(--dark);
-      box-shadow: 0 5px 12px rgba(255, 95, 162, 0.25);
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      font-size: 0.75rem;
-      color: #7c5b8a;
-    }
-
-    .pill {
-      padding: 0.25rem 0.7rem;
-      border-radius: var(--rounded-full);
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px dashed rgba(255, 149, 207, 0.6);
-    }
-
-    /* MAIN LAYOUT */
-
-    main {
-      flex: 1;
-    }
-
-    .page {
-      max-width: 1080px;
-      margin: 1.4rem auto 2.4rem;
-      padding: 0 1.2rem;
-      display: grid;
-      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
-      gap: 1.4rem;
-    }
-
-    /* HERO / HEADER CARD */
-
-    .hero-card {
-      grid-column: 1 / -1;
-      background: radial-gradient(circle at top left, #ffeaf5, #ffffff);
-      border-radius: 26px;
-      padding: 1.6rem 1.4rem;
-      box-shadow: var(--shadow);
-      display: grid;
-      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.2fr);
-      gap: 1.2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-left {
-      display: flex;
-      flex-direction:
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('gossipInput');
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                addGossip();
+            }
+        });
+    });
+          </script>
