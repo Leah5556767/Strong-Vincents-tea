@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Strong Vincents Middle School Tea</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* RESET */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #fff7fd;
+      --accent: #ff5fa2;
+      --accent-soft: #ffe0f1;
+      --dark: #2a1133;
+      --text: #4b314f;
+      --card: #ffffff;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --rounded-xl: 18px;
+      --rounded-full: 999px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      --font-script: "Brush Script MT", "Lucida Handwriting", cursive;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: radial-gradient(circle at 0 0, #ffeef8, #fff7fd 40%, #ffe6ff);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER / NAV */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(
+        90deg,
+        rgba(255, 247, 253, 0.92),
+        rgba(255, 224, 241, 0.92)
+      );
+      border-bottom: 1px solid rgba(255, 149, 207, 0.35);
+    }
+
+    .nav {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 18px;
+      background: conic-gradient(
+        from 220deg,
+        #ff5fa2,
+        #ffc15f,
+        #6b5bff,
+        #ff5fa2
+      );
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 8px 18px rgba(255, 95, 162, 0.4);
+    }
+
+    .brand-text-main {
+      font-family: var(--font-script);
+      font-size: 1.5rem;
+      color: var(--dark);
+      line-height: 1;
+    }
+
+    .brand-text-sub {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #866190;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.8rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .nav-links button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0.45rem 0.8rem;
+      border-radius: var(--rounded-full);
+      color: #7c5b8a;
+      transition: all 0.18s ease-out;
+    }
+
+    .nav-links button:hover,
+    .nav-links button.active {
+      background: #ffedf6;
+      color: var(--dark);
+      box-shadow: 0 5px 12px rgba(255, 95, 162, 0.25);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.75rem;
+      color: #7c5b8a;
+    }
+
+    .pill {
+      padding: 0.25rem 0.7rem;
+      border-radius: var(--rounded-full);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px dashed rgba(255, 149, 207, 0.6);
+    }
+
+    /* MAIN LAYOUT */
+
+    main {
+      flex: 1;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 1.4rem auto 2.4rem;
+      padding: 0 1.2rem;
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+      gap: 1.4rem;
+    }
+
+    /* HERO / HEADER CARD */
+
+    .hero-card {
+      grid-column: 1 / -1;
+      background: radial-gradient(circle at top left, #ffeaf5, #ffffff);
+      border-radius: 26px;
+      padding: 1.6rem 1.4rem;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.2fr);
+      gap: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction:
